@@ -28,6 +28,7 @@ import logging
 
 import numpy as np
 import torch
+from transformers.utils.import_utils import is_flash_attn_2_available
 
 import fiftyone.core.models as fom
 import fiftyone.utils.torch as fout
@@ -285,11 +286,12 @@ class Qwen3VLEmbeddingModel(fom.Model, fom.PromptMixin, SupportsGetItem, TorchMo
             "fps": self.config.fps,
             "num_frames": self.config.num_frames,
             "max_frames": self.config.max_frames,
+            "torch_dtype": "auto",
         }
         
-        if self.device == "cuda":
-            embedder_kwargs["torch_dtype"] = torch.bfloat16
+        if self.device == "cuda" and is_flash_attn_2_available():
             embedder_kwargs["attn_implementation"] = "flash_attention_2"
+            logger.info("Using Flash Attention 2")
         
         self._embedder = Qwen3VLEmbedder(
             model_name_or_path=self.config.model_path,
