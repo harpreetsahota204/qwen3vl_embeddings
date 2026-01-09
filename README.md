@@ -1,5 +1,8 @@
 # Qwen3-VL-Embedding for FiftyOne
 
+![Qwen3-VL-Embedding Demo](qwen3_vl_embedding.gif)
+
+
 A [FiftyOne](https://docs.voxel51.com/) zoo model integration for [Qwen3-VL-Embedding](https://huggingface.co/Qwen/Qwen3-VL-Embedding-8B), enabling state-of-the-art multimodal embeddings for video and image datasets.
 
 Qwen3-VL-Embedding maps text, images, and video into a unified representation space, enabling powerful cross-modal retrieval and understanding. Built on the Qwen3-VL foundation model, it achieves state-of-the-art results on multimodal embedding benchmarks including MMEB-V2.
