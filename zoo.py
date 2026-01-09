@@ -308,14 +308,17 @@ class Qwen3VLEmbeddingModel(fom.Model, fom.PromptMixin, SupportsGetItem, TorchMo
         """Extract filepath from media input.
         
         Args:
-            media: Dict from GetItem or object with filepath attribute
+            media: Dict from GetItem, string path, or video reader object
         
         Returns:
             str: Filepath to media file
         """
         if isinstance(media, dict):
             return media["filepath"]
-        return media.filepath
+        if isinstance(media, str):
+            return media
+        # FFmpegVideoReader stores path in inpath
+        return media.inpath
     
     def _prepare_embedder_input(self, filepath):
         """Prepare input dict for Qwen3VLEmbedder.process().
