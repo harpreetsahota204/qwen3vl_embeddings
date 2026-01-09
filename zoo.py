@@ -308,23 +308,14 @@ class Qwen3VLEmbeddingModel(fom.Model, fom.PromptMixin, SupportsGetItem, TorchMo
         """Extract filepath from media input.
         
         Args:
-            media: Video/image reader object, string path, or dict from GetItem
+            media: Dict from GetItem or object with filepath attribute
         
         Returns:
             str: Filepath to media file
         """
         if isinstance(media, dict):
             return media["filepath"]
-        elif isinstance(media, str):
-            return media
-        elif hasattr(media, "filepath"):
-            return media.filepath
-        elif hasattr(media, "path"):
-            return media.path
-        elif hasattr(media, "inpath"):
-            return media.inpath
-        else:
-            raise TypeError(f"Unsupported media type: {type(media)}")
+        return media.filepath
     
     def _prepare_embedder_input(self, filepath):
         """Prepare input dict for Qwen3VLEmbedder.process().
@@ -367,8 +358,9 @@ class Qwen3VLEmbeddingModel(fom.Model, fom.PromptMixin, SupportsGetItem, TorchMo
         filepath = self._extract_media_path(media)
         input_dict = self._prepare_embedder_input(filepath)
         
-        embedding = self._embedder.process([input_dict])
-        result = embedding[0].cpu().float().numpy()
+        with torch.no_grad():
+            embedding = self._embedder.process([input_dict])
+            result = embedding[0].cpu().float().numpy()
         
         self._last_computed_embeddings = result.reshape(1, -1)
         return result
@@ -386,11 +378,12 @@ class Qwen3VLEmbeddingModel(fom.Model, fom.PromptMixin, SupportsGetItem, TorchMo
             self._load_model()
         
         embeddings = []
-        for media in medias:
-            filepath = self._extract_media_path(media)
-            input_dict = self._prepare_embedder_input(filepath)
-            embedding = self._embedder.process([input_dict])
-            embeddings.append(embedding[0].cpu().float().numpy())
+        with torch.no_grad():
+            for media in medias:
+                filepath = self._extract_media_path(media)
+                input_dict = self._prepare_embedder_input(filepath)
+                embedding = self._embedder.process([input_dict])
+                embeddings.append(embedding[0].cpu().float().numpy())
         
         result = np.stack(embeddings, axis=0)
         self._last_computed_embeddings = result
@@ -422,7 +415,8 @@ class Qwen3VLEmbeddingModel(fom.Model, fom.PromptMixin, SupportsGetItem, TorchMo
         if self._embedder is None:
             self._load_model()
         
-        embedding = self._embedder.process([{"text": prompt}])
+        with torch.no_grad():
+            embedding = self._embedder.process([{"text": prompt}])
         return embedding[0].cpu().float().numpy()
     
     def embed_prompts(self, prompts):
@@ -437,8 +431,9 @@ class Qwen3VLEmbeddingModel(fom.Model, fom.PromptMixin, SupportsGetItem, TorchMo
         if self._embedder is None:
             self._load_model()
         
-        inputs = [{"text": p} for p in prompts]
-        embeddings = self._embedder.process(inputs)
+        with torch.no_grad():
+            inputs = [{"text": p} for p in prompts]
+            embeddings = self._embedder.process(inputs)
         return embeddings.cpu().float().numpy()
     
     # =========================================================================
@@ -456,8 +451,20 @@ class Qwen3VLEmbeddingModel(fom.Model, fom.PromptMixin, SupportsGetItem, TorchMo
             self._text_features = self.embed_prompts(prompts)
         return self._text_features
     
-    def _predict_all(self, medias):
-        """Run zero-shot classification on a batch.
+    def predict(self, media):
+        """Predict on a single media item (required by Model base class).
+        
+        Args:
+            media: Video/image to classify
+        
+        Returns:
+            Classification label
+        """
+        results = self.predict_all([media])
+        return results[0]
+    
+    def predict_all(self, medias):
+        """Predict on a batch of media items.
         
         Args:
             medias: List of videos/images to classify
