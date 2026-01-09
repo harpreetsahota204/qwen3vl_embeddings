@@ -248,6 +248,84 @@ class Qwen3VLEmbeddingModel(fom.Model, fom.PromptMixin, SupportsGetItem, TorchMo
         self._text_features = None
     
     # =========================================================================
+    # Configurable properties (can be changed without reloading model)
+    # =========================================================================
+    
+    @property
+    def fps(self):
+        """Frame sampling rate for videos."""
+        return self.config.fps
+    
+    @fps.setter
+    def fps(self, value):
+        """Set frame sampling rate."""
+        self.config.fps = value
+    
+    @property
+    def max_frames(self):
+        """Maximum frames to sample from video."""
+        return self.config.max_frames
+    
+    @max_frames.setter
+    def max_frames(self, value):
+        """Set max frames."""
+        self.config.max_frames = value
+    
+    @property
+    def num_frames(self):
+        """Target number of frames to extract."""
+        return self.config.num_frames
+    
+    @num_frames.setter
+    def num_frames(self, value):
+        """Set target number of frames."""
+        self.config.num_frames = value
+    
+    @property
+    def min_pixels(self):
+        """Minimum pixels for processing."""
+        return self.config.min_pixels
+    
+    @min_pixels.setter
+    def min_pixels(self, value):
+        """Set minimum pixels."""
+        self.config.min_pixels = value
+    
+    @property
+    def max_pixels(self):
+        """Maximum pixels for processing."""
+        return self.config.max_pixels
+    
+    @max_pixels.setter
+    def max_pixels(self, value):
+        """Set maximum pixels."""
+        self.config.max_pixels = value
+    
+    @property
+    def total_pixels(self):
+        """Total pixel budget for video frames."""
+        return self.config.total_pixels
+    
+    @total_pixels.setter
+    def total_pixels(self, value):
+        """Set total pixel budget."""
+        self.config.total_pixels = value
+    
+    @media_type.setter
+    def media_type(self, value):
+        """Set media type (video or image).
+        
+        Args:
+            value: "video" or "image"
+        
+        Raises:
+            ValueError: If value is not "video" or "image"
+        """
+        if value not in ("video", "image"):
+            raise ValueError(f"media_type must be 'video' or 'image', got '{value}'")
+        self.config.media_type = value
+    
+    # =========================================================================
     # TorchModelMixin properties
     # =========================================================================
     
