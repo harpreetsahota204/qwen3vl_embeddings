@@ -143,9 +143,13 @@ session = fo.launch_app(dataset)
 | `fps` | `1.0` | Frame sampling rate for videos |
 | `max_frames` | `64` | Maximum frames to sample from video |
 | `num_frames` | `64` | Target number of frames to extract |
+| `min_pixels` | `4096` | Minimum pixels for processing |
+| `max_pixels` | `1843200` | Maximum pixels for processing |
 | `total_pixels` | `7864320` | Total pixel budget for video frames |
 | `text_prompt` | `""` | Prefix for class labels in zero-shot classification |
 | `classes` | `None` | List of class labels for zero-shot classification |
+
+All parameters can be modified at runtime via properties (e.g., `model.fps = 0.5`).
 
 ### Using with Image Datasets
 
@@ -158,6 +162,30 @@ model = foz.load_zoo_model(
 )
 
 image_dataset.compute_embeddings(model, embeddings_field="embeddings")
+```
+
+### Runtime Configuration
+
+All model parameters can be changed at runtime without reloading the model:
+
+```python
+# Load model once
+model = foz.load_zoo_model("Qwen/Qwen3-VL-Embedding-2B")
+
+# Process video dataset
+video_dataset.compute_embeddings(model, embeddings_field="embeddings")
+
+# Adjust video sampling for longer videos
+model.media_type = "video"
+model.fps = 0.5
+model.max_frames = 128
+long_video_dataset.compute_embeddings(model, embeddings_field="embeddings")
+
+
+# Switch to image mode without reloading
+model.media_type = "image"
+image_dataset.compute_embeddings(model, embeddings_field="embeddings")
+
 ```
 
 ## Video Length Constraints
