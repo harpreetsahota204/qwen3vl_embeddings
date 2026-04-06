@@ -1,3 +1,22 @@
+# ---------------------------------------------------------------------------
+# Compatibility shim: check_model_inputs was added in transformers >5.0.
+# Older versions don't have it; newer versions do. The try/except ensures
+# this zoo model works with any transformers version.
+# ---------------------------------------------------------------------------
+try:
+    from transformers.utils.generic import check_model_inputs
+except ImportError:
+    import transformers.utils.generic as _generic
+
+    def _check_model_inputs_noop(func=None, *, tie_last_hidden_states=True):
+        if func is not None:
+            return func
+        def decorator(f):
+            return f
+        return decorator
+
+    _generic.check_model_inputs = _check_model_inputs_noop
+
 import torch
 import torch.nn.functional as F
 import unicodedata
