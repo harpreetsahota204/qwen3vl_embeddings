@@ -18,7 +18,7 @@ Qwen3-VL-Embedding maps text, images, and video into a unified representation sp
 ## Installation
 
 ```bash
-pip install fiftyone decord qwen-vl-utils transformers torch torchvision
+pip install fiftyone qwen-vl-utils transformers torch torchvision
 ```
 
 ## Quick Start
@@ -231,7 +231,6 @@ transformers
 torch
 torchvision
 qwen-vl-utils
-decord
 ```
 
 ## License
